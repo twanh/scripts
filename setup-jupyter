@@ -23,6 +23,11 @@ Optional arguments:
   --venv VENV           the name of the venv
   --python-interpreter PYTHON_INTERPRETER
                         the python interpreter to use (default: python3)
+
+TODO:
+
+- [ ] Rewrite all .ipynb files their kernel to match the new kernel?
+
 """
 import argparse
 import json
