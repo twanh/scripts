@@ -1,4 +1,29 @@
 #! /usr/bin/env python3.9 
+"""setup-jupyter
+
+This is a simple script to bootstrap a simple jupyter notebook project.
+
+Author: Twan Huiskens <huiskenstwan@gmail.com>
+
+This script creates the virtual environment for the project and adds the venv
+as a kernel to the jupyter notebook.
+It also creates a 'start' script to activate the virtual environment and
+start the notebook server.
+
+Usage: setup-jupyter [-h] [--jupyter-bin JUPYTER_BIN] [--venv VENV] [--python-interpreter PYTHON_INTERPRETER] project-name path
+
+Positional arguments:
+  project-name          the name of the project
+  path                  the path to create the setup in
+
+Optional arguments:
+  -h, --help            show this help message and exit
+  --jupyter-bin JUPYTER_BIN
+                        the path that contains the jupyter executable
+  --venv VENV           the name of the venv
+  --python-interpreter PYTHON_INTERPRETER
+                        the python interpreter to use (default: python3)
+"""
 import argparse
 import json
 import os
