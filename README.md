@@ -2,14 +2,14 @@
 
 > This repo contains some (custom) scripts that I like to have on my path to speed of my daily tasks.
 
-# `setup-jupyter`
+## `setup-jupyter`
 
 This script creates the virtual environment for the project and adds the venv
 as a kernel to the jupyter notebook.
 It also creates a 'start' script to activate the virtual environment and
 start the notebook server.
 
-## Usage:
+### Usage:
 
 ```shell
 usage: setup-jupyter [-h] [--jupyter-bin JUPYTER_BIN] [--venv VENV] [--python-interpreter PYTHON_INTERPRETER] project-name path
