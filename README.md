@@ -11,7 +11,7 @@ start the notebook server.
 
 ### Usage:
 
-```shell
+```
 usage: setup-jupyter [-h] [--jupyter-bin JUPYTER_BIN] [--venv VENV] [--python-interpreter PYTHON_INTERPRETER] project-name path
 
 Quickly setup a jupyternotebook in a venv with vim binds
