@@ -157,6 +157,34 @@ def main() -> int:
     st = os.stat(script_path)
     os.chmod(script_path, st.st_mode | stat.S_IEXEC)
 
+    # Check if there are any .ipynb files
+    # Ask if the kernels have to be changed
+
+    notebook_files = []
+    for path, _, files in os.walk(path):
+        for file in files:
+            if file.endswith('.ipynb'):
+                full_file_path = os.path.join(path, file)
+                notebook_files.append(full_file_path)
+
+    print(f"{COLORS.WARNING}Found {len(notebook_files)} notebook files.{COLORS.ENDC}")
+    y_n = input(f"{COLORS.OKBLUE}Do you want to change the kernels of these files? [y/n] {COLORS.ENDC}")
+    if y_n.lower() == 'y':
+        for notebook in notebook_files:
+            print(f"{COLORS.OKBLUE}Updating {notebook}{COLORS.ENDC}")
+            with open(notebook, 'r+') as n_file:
+                data  = json.load(n_file)
+                new_kernel_spec = {
+                    "display_name": f'{proj_name}_{venv_name}',
+                    "name": venv_name,
+                    "language": "python",
+                }
+                data['metadata']['kernelspec'] = new_kernel_spec
+                n_file.seek(0)
+                json.dump(data, n_file, indent=4)
+                n_file.truncate()
+
+
     print(f"{COLORS.BOLD}{COLORS.OKGREEN}SETUP DONE!{COLORS.ENDC}")
     print(f"{COLORS.OKBLUE}run: `{script_path}` to start the notebook{COLORS.ENDC}")
 
