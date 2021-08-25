@@ -1,4 +1,4 @@
-#! /usr/bin/env python3.9 
+#! /usr/bin/env python3.9
 """setup-jupyter
 
 This is a simple script to bootstrap a simple jupyter notebook project.
@@ -10,7 +10,8 @@ as a kernel to the jupyter notebook.
 It also creates a 'start' script to activate the virtual environment and
 start the notebook server.
 
-Usage: setup-jupyter [-h] [--jupyter-bin JUPYTER_BIN] [--venv VENV] [--python-interpreter PYTHON_INTERPRETER] project-name path
+Usage: setup-jupyter [-h] [--jupyter-bin JUPYTER_BIN] [--venv VENV]
+        [--python-interpreter PYTHON_INTERPRETER] project-name path
 
 Positional arguments:
   project-name          the name of the project
@@ -31,6 +32,7 @@ import os
 import stat
 import subprocess
 
+
 class COLORS:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
@@ -41,16 +43,18 @@ class COLORS:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
-# The venv bin folder that contains the jupyter executable 
+
+# The venv bin folder that contains the jupyter executable
 DEFAULT_JUPYTER_BIN = '~/bin/jupyterlabs-venv/bin'
 # The default name for the venv folder
 DEFAULT_VENV_NAME = '.venv'
+
 
 def _create_argparser() -> argparse.ArgumentParser:
 
     parser = argparse.ArgumentParser(
         prog='setup-jupyter',
-        description="Quickly setup a jupyternotebook in a venv with vim binds"
+        description='Quickly setup a jupyternotebook in a venv with vim binds',
     )
 
     parser.add_argument(
@@ -59,26 +63,26 @@ def _create_argparser() -> argparse.ArgumentParser:
     )
 
     parser.add_argument(
-        "path",
-        help="the path to create the setup in",
+        'path',
+        help='the path to create the setup in',
     )
 
     parser.add_argument(
         '--jupyter-bin',
         default=DEFAULT_JUPYTER_BIN,
-        help="the path that contains the jupyter executable"
+        help='the path that contains the jupyter executable',
     )
 
     parser.add_argument(
         '--venv',
         default=DEFAULT_VENV_NAME,
-        help='the name of the venv'
+        help='the name of the venv',
     )
 
     parser.add_argument(
         '--python-interpreter',
         default='python3',
-        help='the python interpreter to use (default: python3)'
+        help='the python interpreter to use (default: python3)',
 
     )
     return parser
@@ -91,50 +95,71 @@ def main() -> int:
     path = args['path']
     proj_name = args['project-name']
     full_path = os.path.expanduser(path)
-    jupyter_bin  = args['jupyter_bin']
+    jupyter_bin = args['jupyter_bin']
     venv_name = args['venv']
     python = args['python_interpreter']
 
-
     jupyter_path = os.path.expanduser(os.path.join(jupyter_bin, 'jupyter'))
 
-    print(f'{COLORS.BOLD}{COLORS.OKBLUE}Setting up jupyter project "{proj_name}"{COLORS.ENDC}')
+    print(
+        f'{COLORS.BOLD}{COLORS.OKBLUE}Setting up jupyter project \
+        "{proj_name}"{COLORS.ENDC}',
+    )
 
     # Make sure jupyter is installed
     if not os.path.exists(jupyter_path):
-        print(f'{COLORS.BOLD}{COLORS.FAIL}Could not find jupyter{COLORS.ENDC}')
-        print(f"{COLORS.FAIL}Did you specify the correct jupter-bin?{COLORS.ENDC}")
+        print(
+            f'{COLORS.BOLD}{COLORS.FAIL}Could not find jupyter{COLORS.ENDC}',
+        )
+        print(
+            f'{COLORS.FAIL}Did you specify the correct jupter-bin?\
+            {COLORS.ENDC}',
+        )
         print(f'{COLORS.FAIL}{jupyter_bin=}{COLORS.ENDC}')
         return 1
 
     # Create venv for the project
     if not os.path.exists(full_path):
-        print(f"{COLORS.BOLD}{COLORS.FAIL}\
+        print(
+            f'{COLORS.BOLD}{COLORS.FAIL}\
                The path you specified cannot be found. \
-               Please create it before running this script.{COLORS.ENDC}",
+               Please create it before running this script.{COLORS.ENDC}',
         )
         return 1
 
     venv_path = os.path.join(path, venv_name)
-    print(f"{COLORS.OKBLUE}Creating venv @ `{venv_path}`{COLORS.ENDC}")
+    print(f'{COLORS.OKBLUE}Creating venv @ `{venv_path}`{COLORS.ENDC}')
     ret = subprocess.run((python, '-m', 'venv', venv_path))
     assert ret.returncode == 0
 
     # Check that venv is installed correctly
     venv_pip_path = os.path.join(venv_path, 'bin/pip')
     venv_python_path = os.path.join(venv_path, 'bin/python')
-    assert os.path.exists(venv_pip_path), f"no pip installed in venv {venv_pip_path=}"
-    assert os.path.exists(venv_python_path), f"no python installed in venv {venv_python_path=}"
+    assert os.path.exists(
+        venv_pip_path,
+    ), f'no pip installed in venv {venv_pip_path=}'
+    assert os.path.exists(
+        venv_python_path,
+    ), f'no python installed in venv {venv_python_path=}'
 
     # Install the kernel
-    print(f"{COLORS.OKBLUE}Installing the ipykernel{COLORS.ENDC}")
+    print(f'{COLORS.OKBLUE}Installing the ipykernel{COLORS.ENDC}')
     install_kern_ret = subprocess.run((venv_pip_path, 'install', 'ipykernel'))
     assert install_kern_ret.returncode == 0
-    install_kern_venv_ret = subprocess.run((venv_python_path, '-m', 'ipykernel', 'install', '--user', '--name', venv_name))
+    install_kern_venv_ret = subprocess.run(
+        (
+            venv_python_path, '-m', 'ipykernel',
+            'install', '--user', '--name', venv_name,
+        ),
+    )
     assert install_kern_venv_ret.returncode == 0
 
-    with open(os.path.expanduser(f"~/.local/share/jupyter/kernels/{venv_name}/kernel.json"), 'r+') as f:
-        data  = json.load(f)
+    with open(
+        os.path.expanduser(
+            f'~/.local/share/jupyter/kernels/{venv_name}/kernel.json',
+        ), 'r+',
+    ) as f:
+        data = json.load(f)
         data['display_name'] = f'{proj_name}_{venv_name}'
         f.seek(0)
         json.dump(data, f, indent=4)
@@ -145,9 +170,9 @@ def main() -> int:
     script_path = os.path.join(path, 'start')
     with open(script_path, 'w') as start_file:
         start_file.writelines((
-            "#!/usr/bin/env bash\n",
-            f"source {activate_path}\n",
-            f"{jupyter_path} notebook {path}\n"
+            '#!/usr/bin/env bash\n',
+            f'source {activate_path}\n',
+            f'{jupyter_path} notebook {path}\n',
         ))
 
     st = os.stat(script_path)
@@ -163,30 +188,34 @@ def main() -> int:
                 full_file_path = os.path.join(path, file)
                 notebook_files.append(full_file_path)
 
-    print(f"{COLORS.WARNING}Found {len(notebook_files)} notebook files.{COLORS.ENDC}")
-    y_n = input(f"{COLORS.OKBLUE}Do you want to change the kernels of these files? [y/n] {COLORS.ENDC}")
+    print(f'{COLORS.WARNING}Found {len(notebook_files)}\
+          notebook files.{COLORS.ENDC}')
+    y_n = input(
+        f'{COLORS.OKBLUE}Do you want to change the kernels\
+        of these files? [y/n] {COLORS.ENDC}',
+    )
     if y_n.lower() == 'y':
         for notebook in notebook_files:
-            print(f"{COLORS.OKBLUE}Updating {notebook}{COLORS.ENDC}")
+            print(f'{COLORS.OKBLUE}Updating {notebook}{COLORS.ENDC}')
             with open(notebook, 'r+') as n_file:
-                data  = json.load(n_file)
+                data = json.load(n_file)
                 new_kernel_spec = {
-                    "display_name": f'{proj_name}_{venv_name}',
-                    "name": venv_name,
-                    "language": "python",
+                    'display_name': f'{proj_name}_{venv_name}',
+                    'name': venv_name,
+                    'language': 'python',
                 }
                 data['metadata']['kernelspec'] = new_kernel_spec
                 n_file.seek(0)
                 json.dump(data, n_file, indent=4)
                 n_file.truncate()
 
-
-    print(f"{COLORS.BOLD}{COLORS.OKGREEN}SETUP DONE!{COLORS.ENDC}")
-    print(f"{COLORS.OKBLUE}run: `{script_path}` to start the notebook{COLORS.ENDC}")
+    print(f'{COLORS.BOLD}{COLORS.OKGREEN}SETUP DONE!{COLORS.ENDC}')
+    print(f'{COLORS.OKBLUE}run: `{script_path}` to start the\
+          notebook{COLORS.ENDC}')
 
     return 0
 
-if __name__ == "__main__":
+
+if __name__ == '__main__':
 
     raise SystemExit(main())
-
