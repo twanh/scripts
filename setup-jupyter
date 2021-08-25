@@ -1,12 +1,19 @@
 #! /usr/bin/env python3.9 
-
 import argparse
 import json
 import os
 import stat
 import subprocess
 
-from termcolor import colored
+class COLORS:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 # The venv bin folder that contains the jupyter executable 
 DEFAULT_JUPYTER_BIN = '~/bin/jupyterlabs-venv/bin'
@@ -64,48 +71,26 @@ def main() -> int:
 
 
     jupyter_path = os.path.expanduser(os.path.join(jupyter_bin, 'jupyter'))
-    jupyterlab_path = os.path.expanduser(
-        os.path.join(jupyter_bin, 'jupyter-lab')
-    )
 
-    print(colored(f"Settuping up jupyter project {proj_name}", 'cyan', attrs=['bold']))
+    print(f'{COLORS.BOLD}{COLORS.OKBLUE}Setting up jupyter project "{proj_name}"{COLORS.ENDC}')
 
     # Make sure jupyter is installed
     if not os.path.exists(jupyter_path):
-        print(
-            colored(
-                "Could not find jupyter",
-                'red',
-                attrs=['bold']
-            )
-        )
-        print(
-            colored(
-                "Did you specify the correct jupter-bin?",
-                'red'
-            )
-        )
-        print(
-            colored(
-                f'{jupyter_bin=},{jupyterlab_path=}',
-                'red'
-            )
-        )
+        print(f'{COLORS.BOLD}{COLORS.FAIL}Could not find jupyter{COLORS.ENDC}')
+        print(f"{COLORS.FAIL}Did you specify the correct jupter-bin?{COLORS.ENDC}")
+        print(f'{COLORS.FAIL}{jupyter_bin=}{COLORS.ENDC}')
         return 1
 
     # Create venv for the project
     if not os.path.exists(full_path):
-        print(
-            colored("The path you specified cannot be found. \
-                     Please create it before running this script.",
-                    'red',
-                    attrs=['bold']
-            )
+        print(f"{COLORS.BOLD}{COLORS.FAIL}\
+               The path you specified cannot be found. \
+               Please create it before running this script.{COLORS.ENDC}",
         )
         return 1
 
     venv_path = os.path.join(path, venv_name)
-    print(colored(f"Creating venv @ {venv_path}", 'cyan'))
+    print(f"{COLORS.OKBLUE}Creating venv @ `{venv_path}`{COLORS.ENDC}")
     ret = subprocess.run((python, '-m', 'venv', venv_path))
     assert ret.returncode == 0
 
@@ -116,7 +101,7 @@ def main() -> int:
     assert os.path.exists(venv_python_path), f"no python installed in venv {venv_python_path=}"
 
     # Install the kernel
-    print(colored('Installing the ipykernel', 'cyan'))
+    print(f"{COLORS.OKBLUE}Installing the ipykernel{COLORS.ENDC}")
     install_kern_ret = subprocess.run((venv_pip_path, 'install', 'ipykernel'))
     assert install_kern_ret.returncode == 0
     install_kern_venv_ret = subprocess.run((venv_python_path, '-m', 'ipykernel', 'install', '--user', '--name', venv_name))
@@ -142,8 +127,8 @@ def main() -> int:
     st = os.stat(script_path)
     os.chmod(script_path, st.st_mode | stat.S_IEXEC)
 
-    print(colored("Setup done!", 'green', attrs=['bold']))
-    print(colored(f"run: {script_path} to start the notebook", 'cyan'))
+    print(f"{COLORS.BOLD}{COLORS.OKGREEN}SETUP DONE!{COLORS.ENDC}")
+    print(f"{COLORS.OKBLUE}run: `{script_path}` to start the notebook{COLORS.ENDC}")
 
     return 0
 
