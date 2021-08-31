@@ -178,6 +178,16 @@ def main() -> int:
     st = os.stat(script_path)
     os.chmod(script_path, st.st_mode | stat.S_IEXEC)
 
+    # Ask if jupytext has te be installed
+    # jupytext can be used to convert notebooks to python files
+    # it is also required by the nvim jupyter notebook plugin
+    install_jupytext_y_n = input(
+        f'{COLORS.OKBLUE}Do you want to install jupytext? [y/n] {COLORS.ENDC}',
+    )
+    if install_jupytext_y_n.lower() == 'y':
+        print(f'{COLORS.OKGREEN}Installing jupytext{COLORS.ENDC}')
+        subprocess.run((venv_pip_path, 'install', 'jupytext'))
+
     # Check if there are any .ipynb files
     # Ask if the kernels have to be changed
 
