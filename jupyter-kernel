@@ -1,0 +1,82 @@
+#! /usr/bin/env python3.9
+import argparse
+import json
+import os
+
+
+class COLORS:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
+def _create_argparser() -> argparse.ArgumentParser:
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        'notebook',
+        help="the notebook to change the kernel for \
+        ('.' means all notebooks in current directory)",
+    )
+
+    parser.add_argument(
+        'kernel_name',
+        help='the (new) kernel name',
+    )
+    parser.add_argument(
+        'venv_name',
+        help='the name of the virtual environment',
+    )
+
+    return parser
+
+
+def _update_kernel(notebook: str, kernel_name: str, venv_name: str) -> None:
+    with open(notebook, 'r+') as n_file:
+        data = json.load(n_file)
+        new_kernel_spec = {
+            'display_name': f'{kernel_name}_{venv_name}',
+            'name': venv_name,
+            'language': 'python',
+        }
+        data['metadata']['kernelspec'] = new_kernel_spec
+        n_file.seek(0)
+        json.dump(data, n_file, indent=4)
+        n_file.truncate()
+
+
+def main() -> int:
+
+    parser = _create_argparser()
+    args = vars(parser.parse_args())
+
+    notebook_files = []
+    if args['notebook'] == '.':
+        for path, _, files in os.walk(args['notebook']):
+            for file in files:
+                if file.endswith('.ipynb'):
+                    full_file_path = os.path.join(path, file)
+                    notebook_files.append(full_file_path)
+        print(
+            f'{COLORS.OKBLUE}Found {len(notebook_files)} notebooks\
+            to change {COLORS.ENDC}',
+        )
+    else:
+        notebook_files.append(args['notebook'])
+
+    for nb in notebook_files:
+        print(f'{COLORS.OKBLUE}Updating {nb} {COLORS.ENDC}')
+        _update_kernel(nb, args['kernel_name'], args['venv_name'])
+
+    print(f'{COLORS.OKGREEN}Done!{COLORS.ENDC}')
+    return 0
+
+
+if __name__ == '__main__':
+
+    raise SystemExit(main())
