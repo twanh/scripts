@@ -1,0 +1,126 @@
+#! /usr/bin/env python3.9
+import argparse
+from string import Template
+import os
+import datetime
+
+from typing import Union
+from typing import TypedDict
+
+
+_MAIN_TEMPLATE = """\
+# $author
+# $date
+# $filename
+# $desc
+
+def main() -> int:
+    return 0
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())
+
+"""
+
+
+def _create_argparser() -> argparse.ArgumentParser:
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('n', type=int, help="the week number")
+    parser.add_argument(
+        '--author',
+        type=str,
+        help="the name of the creator",
+    )
+    parser.add_argument(
+        '--filename',
+        type=str,
+        help="the name of the file",
+    )
+    parser.add_argument(
+        '--desc',
+        type=str,
+        help="simple description of the program",
+    )
+    parser.add_argument(
+        '--date',
+        type=str,
+        help="the date the file is made",
+    )
+
+    return parser
+
+
+class TemplateOptions(TypedDict):
+    week_n: int
+    author: Union[str, None]
+    filename: Union[str, None]
+    desc: Union[str, None]
+    date: Union[str, None]
+
+
+def _create_main_content(options: TemplateOptions) -> str:
+
+    tmplate = Template(_MAIN_TEMPLATE)
+
+    if options['author'] is None:
+        options['author'] = "Twan Huiskens"
+
+    if options['date'] is None:
+        today = datetime.datetime.now()
+        options['date'] = f'{today.day}-{today.month}-{today.year}'
+
+    if options['desc'] is None:
+        options['desc'] = '[description]'
+
+    if options['filename'] is None:
+        options['filename'] = '__main__.py'
+
+    return tmplate.safe_substitute(options)
+
+def _create_template(options: TemplateOptions) -> None:
+
+    dir_path = os.path.join(os.getcwd(), f'week{options["week_n"]:02}')
+
+    init_path = os.path.join(dir_path, '__init__.py')
+    main_file_name = options['filename'] or '__main__.py'
+    main_path = os.path.join(dir_path, main_file_name)
+
+
+    # TODO: Catch errors
+    os.mkdir(dir_path)
+
+
+    with open(main_path, 'w') as main_file:
+        file_content = _create_main_content(options)
+        main_file.write(file_content)
+
+    with open(init_path, 'w') as _:
+        pass # creates empty file
+
+
+def main() -> int:
+
+    parser = _create_argparser()
+    args = vars(parser.parse_args())
+
+    options: TemplateOptions = { #type: ignore
+        'week_n': args['n'],
+        'author': args['author'],
+        'filename': args['filename'],
+        'desc': args['desc'],
+        'date': args['date'],
+
+
+    }
+
+    _create_template(options)
+
+    return 0
+
+
+if __name__ == "__main__":
+
+    raise SystemExit(main())
