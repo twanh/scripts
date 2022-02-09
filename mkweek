@@ -80,7 +80,7 @@ def _create_main_content(options: TemplateOptions) -> str:
 
     return tmplate.safe_substitute(options)
 
-def _create_template(options: TemplateOptions) -> None:
+def _create_template(options: TemplateOptions) -> int:
 
     dir_path = os.path.join(os.getcwd(), f'week{options["week_n"]:02}')
 
@@ -89,8 +89,11 @@ def _create_template(options: TemplateOptions) -> None:
     main_path = os.path.join(dir_path, main_file_name)
 
 
-    # TODO: Catch errors
-    os.mkdir(dir_path)
+    try:
+        os.mkdir(dir_path)
+    except FileExistsError:
+        print(f"Directory {dir_path} already exitsts. Exiting now.)
+        return 1
 
 
     with open(main_path, 'w') as main_file:
@@ -100,6 +103,7 @@ def _create_template(options: TemplateOptions) -> None:
     with open(init_path, 'w') as _:
         pass # creates empty file
 
+    return 0
 
 def main() -> int:
 
@@ -116,9 +120,8 @@ def main() -> int:
 
     }
 
-    _create_template(options)
+    return _create_template(options)
 
-    return 0
 
 
 if __name__ == "__main__":
